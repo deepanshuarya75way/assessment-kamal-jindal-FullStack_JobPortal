@@ -28,7 +28,7 @@ router.post("/:jobId", protect, authorize("student"), validate(applySchema), asy
     const existingActiveApplication = await Application.findOne({
       student: req.user._id,
       job: job._id,
-      status: {$ne:"Withdrawn"}
+      status: true
     });
 
 
