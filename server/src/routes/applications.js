@@ -25,13 +25,15 @@ router.post("/:jobId", protect, authorize("student"), validate(applySchema), asy
       return res.status(400).json({ message: "This job is closed for applications." });
     }
 
-    const existingApplication = await Application.findOne({
+    const existingActiveApplication = await Application.findOne({
       student: req.user._id,
-      job: job._id
+      job: job._id,
+      status: {$ne:"Withdrawn"}
     });
 
-    if (existingApplication) {
-      return res.status(409).json({ message: "You have already applied to this job." });
+
+    if (existingActiveApplication) {
+      return res.status(409).json({ message: "You already have an active application for this job" });
     }
 
     const application = await Application.create({
@@ -114,8 +116,10 @@ router.patch("/:id/status", protect, authorize("recruiter"), validate(statusSche
       return res.status(403).json({ message: "You can only manage applications for your jobs." });
     }
 
-    application.status = status;
-    application.statusHistory.push({ status, changedBy: req.user._id });
+    application.status = "Withdrawn";
+    application.isActive = false;
+    application.withdrawnAt = new Date();
+    application.statusHistory.push({ status:"Withdrawn", changedBy: req.user._id });
     await application.save();
 
     await application.populate("student", "name email headline location skills bio");

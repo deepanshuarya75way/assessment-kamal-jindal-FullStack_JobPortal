@@ -13,6 +13,10 @@ const applicationSchema = new mongoose.Schema(
       ref: "Job",
       required: true
     },
+    isActive: {
+      type:Boolean,
+      default:true
+    },
     coverLetter: {
       type: String,
       trim: true,
@@ -57,7 +61,7 @@ const applicationSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-applicationSchema.index({ student: 1, job: 1 }, { unique: true });
+applicationSchema.index({ student: 1, job: 1 }, { unique: true , partialFilterExpression:{isActive:true}});
 applicationSchema.index({ job: 1, status: 1, createdAt: -1 });
 
 const Application = mongoose.model("Application", applicationSchema);
