@@ -25,14 +25,14 @@ router.post("/:jobId", protect, authorize("student"), validate(applySchema), asy
       return res.status(400).json({ message: "This job is closed for applications." });
     }
 
-    const existingActiveApplication = await Application.findOne({
+    const existingApplication = await Application.findOne({
       student: req.user._id,
       job: job._id,
-      status: true
+      isActive: true
     });
 
 
-    if (existingActiveApplication) {
+    if (existingApplication) {
       return res.status(409).json({ message: "You already have an active application for this job" });
     }
 
@@ -142,6 +142,7 @@ router.delete("/:id", protect, authorize("student"), async (req, res, next) => {
     }
 
     application.status = "Withdrawn";
+    application.isActive = false;
     application.withdrawnAt = new Date();
     application.statusHistory.push({ status: "Withdrawn", changedBy: req.user._id });
     await application.save();
